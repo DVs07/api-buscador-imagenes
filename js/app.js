@@ -59,7 +59,7 @@ function mostrarImagenes(imagenes){
         const { previewURL, likes, views, largeImageURL } = imagen;
 
         resultado.innerHTML += `
-        <div class="w-1/2 md:w-1/3 lg:w-1/4 p-3 mb-4"> 
+        <div class="w-full md:w-1/3 lg:w-1/4 p-3 mb-4"> 
             <div class="bg-white">
                 <img class="w-full" src="${previewURL}">
 
