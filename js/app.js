@@ -1,6 +1,11 @@
 const resultado = document.querySelector('#resultado');
 const formulario = document.querySelector('#formulario');
-
+const paginadorDiv = document.querySelector('#paginacion');
+let elemento;
+const registrosPorPagina = 20;
+let totalPaginas;
+let iterador;
+let paginaActual = 1;
 window.onload = () => {
     formulario.addEventListener('submit', validarFormulario);   
 }
@@ -14,7 +19,7 @@ function validarFormulario(event){
         return;
     }
 
-    buscarImagenes(busqueda);
+    buscarImagenes();
 
 }
 function mostrarAlerta(mensaje){
@@ -37,22 +42,32 @@ function mostrarAlerta(mensaje){
     
 }
 
-function buscarImagenes(busqueda){
+function buscarImagenes(){
+    
+    const busqueda = document.querySelector('#termino').value;
+
     const key = '2816069-4182c25b2660eba3ff921e3c7';
-    const url = `https://pixabay.com/api/?key=${key}&q=${busqueda}`;
+    const url = `https://pixabay.com/api/?key=${key}&q=${busqueda}&per_page=${registrosPorPagina}&page=${paginaActual}`;
 
     // console.log(url);
 
     fetch(url)
         .then(respuesta => respuesta.json())
-        .then(resultado => mostrarImagenes(resultado.hits));
+    .then(resultado => {
+        totalPaginas = paginador(resultado.totalHits);
+        console.log('Cantidad de indices del paginador: ' + totalPaginas);
+        console.log('Total de imagenes: ' + resultado.totalHits);
+        console.log('Cantidad de imagenes por pagina: ' + resultado.hits.length);
+        
+        mostrarImagenes(resultado.hits)
+    });
     
 }
 
 function mostrarImagenes(imagenes){
     // console.log(imagenes);
 
-    limpiarHTML();
+    limpiarHTML( resultado);
 
     // Iterar sobre el arreglo de imagenes y construir el HTML
     imagenes.forEach(imagen => {
@@ -80,11 +95,50 @@ function mostrarImagenes(imagenes){
         </div>
         `;
 
+        limpiarHTML(paginadorDiv);
+        mostrarPaginador();
+
     });
 }
 
-function limpiarHTML(){
-    while(resultado.firstChild){
-        resultado.removeChild(resultado.firstChild);
+function paginador(total){
+    return parseInt(Math.ceil(total / registrosPorPagina));
+}
+
+function *crearPaginador(total){
+    for (let i = 1; i <= total; i++ ) {
+        yield i;
+        
+    }
+}
+
+function mostrarPaginador(){
+    iterador = crearPaginador(totalPaginas);
+
+    // console.log(iterador.next().done);
+    
+    // console.log(iterador.next());
+
+    while(true){
+        const {value, done} = iterador.next();
+        if(done) return;
+
+        const botonPaginador = document.createElement('a');
+        botonPaginador.href = '#';
+        botonPaginador.dataset.pagina = value;
+        botonPaginador.textContent = value;
+        botonPaginador.classList.add('siguiente', 'bg-blue-600', 'px-4', 'py-1', 'mr-2', 'mb-4', 'rounded');
+
+        botonPaginador.onclick = () => {
+            paginaActual = value;
+            buscarImagenes();
+        }
+
+        paginadorDiv.appendChild(botonPaginador);
+    }
+}
+function limpiarHTML(elemento){
+    while(elemento.firstChild){
+        elemento.removeChild(elemento.firstChild);
     }
 }
